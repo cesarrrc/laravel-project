@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
@@ -15,6 +16,13 @@ use App\Http\Controllers\UserController;
 |
 */
 
+Route::get('/admins-only', function () {
+    // if (Gate::allows('visitAdminPages')) {
+    return 'Only admins should be able to see this page';
+    // }
+    // return "You cannot view this page";
+})->middleware('can:visitAdminPages');
+
 // User Routes
 Route::get('/', [UserController::class, 'showCorrectHomepage'])->name('login');
 Route::post('/register', [UserController::class, 'register'])->middleware('guest');
@@ -25,3 +33,9 @@ Route::post('/logout', [UserController::class, 'logout'])->middleware('mustBeLog
 Route::get('/create-post', [PostController::class, 'showCreateForm'])->middleware('mustBeLoggedIn');
 Route::post('/create-post', [PostController::class, 'storeNewPost'])->middleware('mustBeLoggedIn');
 Route::get('/post/{post}', [PostController::class, 'viewSinglePost']);
+Route::delete('/post/{post}', [PostController::class, 'delete'])->middleware('can:delete,post');
+Route::get('/post/{post}/edit', [PostController::class, 'showEditForm'])->middleware('can:update,post');
+Route::put('/post/{post}', [PostController::class, 'actuallyUpdate'])->middleware('can:update,post');
+
+// Profile Routes
+Route::get('/profile/{pizza:username}', [UserController::class, 'profile'])->middleware('mustBeLoggedIn');
