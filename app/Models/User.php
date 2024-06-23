@@ -4,11 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Post;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\Follow;
 
 class User extends Authenticatable
 {
@@ -48,6 +50,18 @@ class User extends Authenticatable
         return Attribute::make(get: function($value){
             return $value ? '/storage/avatars/' . $value : '/fallback-avatar.jpg';
         });
+    }
+
+    public function feedPosts() {
+        return $this->hasManyThrough(Post::class, Follow::class, 'user_id', 'user_id', 'id','followeduser');
+    }
+
+    public function followers() {
+        return $this->hasMany(Follow::class, 'followeduser');
+    }
+
+    public function followingTheseUsers() {
+        return $this->hasMany(Follow::class, 'user_id');
     }
 
     public function posts() {
